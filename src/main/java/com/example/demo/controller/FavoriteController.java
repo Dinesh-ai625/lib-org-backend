@@ -1,18 +1,25 @@
 package com.example.demo.controller;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.demo.model.Book;
 import com.example.demo.model.Favorite;
 import com.example.demo.model.User;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.FavoriteRepository;
 import com.example.demo.security.CustomUserDetails;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/favorites")
@@ -41,7 +48,9 @@ public class FavoriteController {
         }
 
         Book book = bookRepository.findById(bookId).orElse(null);
-        if (book == null) return ResponseEntity.badRequest().body("Book not found");
+        if (book == null) {
+            return ResponseEntity.badRequest().body("Book not found");
+        }
 
         Favorite favorite = new Favorite();
         favorite.setUser(user);
@@ -53,7 +62,9 @@ public class FavoriteController {
     @DeleteMapping("/remove/{bookId}")
     public ResponseEntity<?> removeFavorite(@PathVariable Long bookId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Favorite favorite = favoriteRepository.findByUserIdAndBookId(userDetails.getUser().getId(), bookId).orElse(null);
-        if (favorite == null) return ResponseEntity.notFound().build();
+        if (favorite == null) {
+            return ResponseEntity.notFound().build();
+        }
 
         favoriteRepository.delete(favorite);
         return ResponseEntity.ok().build();

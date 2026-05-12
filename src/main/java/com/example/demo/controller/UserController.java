@@ -1,14 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.demo.model.User;
+import com.example.demo.repository.UserRepository;
 
 @RestController
 @RequestMapping("/api/users")
@@ -41,7 +42,9 @@ public class UserController {
     @GetMapping("/profile")
     public org.springframework.http.ResponseEntity<?> getProfile(@org.springframework.security.core.annotation.AuthenticationPrincipal com.example.demo.security.CustomUserDetails userDetails) {
         User user = userRepository.findById(userDetails.getUser().getId()).orElse(null);
-        if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
+        if (user == null) {
+            return org.springframework.http.ResponseEntity.notFound().build();
+        }
         return org.springframework.http.ResponseEntity.ok(user);
     }
 
@@ -49,9 +52,11 @@ public class UserController {
     public org.springframework.http.ResponseEntity<?> updateProfile(
             @org.springframework.security.core.annotation.AuthenticationPrincipal com.example.demo.security.CustomUserDetails userDetails,
             @org.springframework.web.bind.annotation.RequestBody java.util.Map<String, String> payload) {
-        
+
         User user = userRepository.findById(userDetails.getUser().getId()).orElse(null);
-        if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
+        if (user == null) {
+            return org.springframework.http.ResponseEntity.notFound().build();
+        }
 
         if (payload.containsKey("username")) {
             String newUsername = payload.get("username");
@@ -60,11 +65,21 @@ public class UserController {
             }
             user.setUsername(newUsername);
         }
-        if (payload.containsKey("firstName")) user.setFirstName(payload.get("firstName"));
-        if (payload.containsKey("lastName")) user.setLastName(payload.get("lastName"));
-        if (payload.containsKey("email")) user.setEmail(payload.get("email"));
-        if (payload.containsKey("bio")) user.setBio(payload.get("bio"));
-        if (payload.containsKey("photoUrl")) user.setPhotoUrl(payload.get("photoUrl"));
+        if (payload.containsKey("firstName")) {
+            user.setFirstName(payload.get("firstName"));
+        }
+        if (payload.containsKey("lastName")) {
+            user.setLastName(payload.get("lastName"));
+        }
+        if (payload.containsKey("email")) {
+            user.setEmail(payload.get("email"));
+        }
+        if (payload.containsKey("bio")) {
+            user.setBio(payload.get("bio"));
+        }
+        if (payload.containsKey("photoUrl")) {
+            user.setPhotoUrl(payload.get("photoUrl"));
+        }
 
         return org.springframework.http.ResponseEntity.ok(userRepository.save(user));
     }
@@ -74,9 +89,11 @@ public class UserController {
             @org.springframework.security.core.annotation.AuthenticationPrincipal com.example.demo.security.CustomUserDetails userDetails,
             @org.springframework.web.bind.annotation.RequestBody java.util.Map<String, String> payload,
             @Autowired org.springframework.security.crypto.password.PasswordEncoder passwordEncoder) {
-        
+
         User user = userRepository.findById(userDetails.getUser().getId()).orElse(null);
-        if (user == null) return org.springframework.http.ResponseEntity.notFound().build();
+        if (user == null) {
+            return org.springframework.http.ResponseEntity.notFound().build();
+        }
 
         String currentPassword = payload.get("currentPassword");
         String newPassword = payload.get("newPassword");

@@ -1,19 +1,28 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.BookRepository;
-import com.example.demo.repository.TransactionRepository;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.security.CustomUserDetails;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
+import com.example.demo.model.Book;
+import com.example.demo.model.Transaction;
+import com.example.demo.model.TransactionStatus;
+import com.example.demo.model.User;
+import com.example.demo.repository.BookRepository;
+import com.example.demo.repository.TransactionRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.security.CustomUserDetails;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -38,8 +47,12 @@ public class TransactionController {
         Book book = bookRepository.findById(bookId).orElse(null);
         User user = userRepository.findById(userId).orElse(null);
 
-        if (book == null || user == null) return ResponseEntity.badRequest().body("Invalid book or user ID");
-        if (book.getAvailableCopies() <= 0) return ResponseEntity.badRequest().body("Book not available");
+        if (book == null || user == null) {
+            return ResponseEntity.badRequest().body("Invalid book or user ID");
+        }
+        if (book.getAvailableCopies() <= 0) {
+            return ResponseEntity.badRequest().body("Book not available");
+        }
 
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         bookRepository.save(book);
@@ -59,8 +72,12 @@ public class TransactionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<?> returnBook(@PathVariable Long id) {
         Transaction tx = transactionRepository.findById(id).orElse(null);
-        if (tx == null) return ResponseEntity.notFound().build();
-        if (tx.getStatus() == TransactionStatus.RETURNED) return ResponseEntity.badRequest().body("Already returned");
+        if (tx == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (tx.getStatus() == TransactionStatus.RETURNED) {
+            return ResponseEntity.badRequest().body("Already returned");
+        }
 
         tx.setStatus(TransactionStatus.RETURNED);
         tx.setReturnDate(LocalDate.now());
@@ -96,8 +113,12 @@ public class TransactionController {
     @PostMapping("/user-borrow/{bookId}")
     public ResponseEntity<?> userBorrowBook(@PathVariable Long bookId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Book book = bookRepository.findById(bookId).orElse(null);
-        if (book == null) return ResponseEntity.badRequest().body("Invalid book");
-        if (book.getAvailableCopies() <= 0) return ResponseEntity.badRequest().body("Book out of stock");
+        if (book == null) {
+            return ResponseEntity.badRequest().body("Invalid book");
+        }
+        if (book.getAvailableCopies() <= 0) {
+            return ResponseEntity.badRequest().body("Book out of stock");
+        }
 
         book.setAvailableCopies(book.getAvailableCopies() - 1);
         bookRepository.save(book);
@@ -116,9 +137,15 @@ public class TransactionController {
     @PostMapping("/user-return/{txId}")
     public ResponseEntity<?> userReturnBook(@PathVariable Long txId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Transaction tx = transactionRepository.findById(txId).orElse(null);
-        if (tx == null) return ResponseEntity.notFound().build();
-        if (!tx.getUser().getId().equals(userDetails.getUser().getId())) return ResponseEntity.status(403).body("Not your book");
-        if (tx.getStatus() == TransactionStatus.RETURNED) return ResponseEntity.badRequest().body("Already returned");
+        if (tx == null) {
+            return ResponseEntity.notFound().build();
+        }
+        if (!tx.getUser().getId().equals(userDetails.getUser().getId())) {
+            return ResponseEntity.status(403).body("Not your book");
+        }
+        if (tx.getStatus() == TransactionStatus.RETURNED) {
+            return ResponseEntity.badRequest().body("Already returned");
+        }
 
         tx.setStatus(TransactionStatus.RETURNED);
         tx.setReturnDate(LocalDate.now());

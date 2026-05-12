@@ -1,13 +1,21 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.Rack;
-import com.example.demo.repository.RackRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import com.example.demo.model.Rack;
+import com.example.demo.repository.RackRepository;
 
 @RestController
 @RequestMapping("/api/racks")
@@ -32,8 +40,10 @@ public class RackController {
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<Rack> updateRack(@PathVariable Long id, @RequestBody Rack rackDetails) {
         Rack rack = rackRepository.findById(id).orElse(null);
-        if (rack == null) return ResponseEntity.notFound().build();
-        
+        if (rack == null) {
+            return ResponseEntity.notFound().build();
+        }
+
         rack.setSection(rackDetails.getSection());
         rack.setColumnNumber(rackDetails.getColumnNumber());
         return ResponseEntity.ok(rackRepository.save(rack));
@@ -42,7 +52,9 @@ public class RackController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<?> deleteRack(@PathVariable Long id) {
-        if (!rackRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if (!rackRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         rackRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
@@ -55,7 +67,9 @@ public class RackController {
         Long idB = payload.get("rackIdB");
         Rack rackA = rackRepository.findById(idA).orElse(null);
         Rack rackB = rackRepository.findById(idB).orElse(null);
-        if (rackA == null || rackB == null) return ResponseEntity.badRequest().body("Invalid rack IDs");
+        if (rackA == null || rackB == null) {
+            return ResponseEntity.badRequest().body("Invalid rack IDs");
+        }
 
         int tempCol = rackA.getColumnNumber();
         rackA.setColumnNumber(rackB.getColumnNumber());

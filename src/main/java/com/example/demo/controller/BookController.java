@@ -1,16 +1,25 @@
 package com.example.demo.controller;
 
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.demo.dto.BookDto;
 import com.example.demo.model.Book;
 import com.example.demo.model.Rack;
 import com.example.demo.repository.BookRepository;
 import com.example.demo.repository.RackRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/books")
@@ -35,15 +44,18 @@ public class BookController {
         if (query == null || query.trim().isEmpty()) {
             return bookRepository.findAll();
         }
-        
+
         if (filterBy != null) {
             switch (filterBy.toLowerCase()) {
-                case "author": return bookRepository.findByAuthorContainingIgnoreCase(query);
-                case "genre": return bookRepository.findByGenreIgnoreCase(query);
-                case "category": return bookRepository.findByCategoryIgnoreCase(query);
+                case "author":
+                    return bookRepository.findByAuthorContainingIgnoreCase(query);
+                case "genre":
+                    return bookRepository.findByGenreIgnoreCase(query);
+                case "category":
+                    return bookRepository.findByCategoryIgnoreCase(query);
             }
         }
-        
+
         // Default to title search
         return bookRepository.findByTitleContainingIgnoreCase(query);
     }
@@ -59,12 +71,18 @@ public class BookController {
         book.setIsbn(bookDto.getIsbn());
         book.setTotalCopies(bookDto.getTotalCopies());
         book.setAvailableCopies(bookDto.getTotalCopies());
-        if (bookDto.getCoverUrl() != null) book.setCoverUrl(bookDto.getCoverUrl());
-        if (bookDto.getDescription() != null) book.setDescription(bookDto.getDescription());
+        if (bookDto.getCoverUrl() != null) {
+            book.setCoverUrl(bookDto.getCoverUrl());
+        }
+        if (bookDto.getDescription() != null) {
+            book.setDescription(bookDto.getDescription());
+        }
 
         if (bookDto.getRackId() != null) {
             Rack rack = rackRepository.findById(bookDto.getRackId()).orElse(null);
-            if (rack == null) return ResponseEntity.badRequest().body("Rack not found");
+            if (rack == null) {
+                return ResponseEntity.badRequest().body("Rack not found");
+            }
             book.setRack(rack);
         }
 
@@ -74,7 +92,9 @@ public class BookController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<?> deleteBook(@PathVariable Long id) {
-        if (!bookRepository.existsById(id)) return ResponseEntity.notFound().build();
+        if (!bookRepository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
         bookRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
@@ -84,7 +104,9 @@ public class BookController {
     @PreAuthorize("hasAnyRole('ADMIN', 'LIBRARIAN')")
     public ResponseEntity<?> updateBookRack(@PathVariable Long id, @RequestBody java.util.Map<String, Object> payload) {
         Book book = bookRepository.findById(id).orElse(null);
-        if (book == null) return ResponseEntity.notFound().build();
+        if (book == null) {
+            return ResponseEntity.notFound().build();
+        }
 
         Object rackIdObj = payload.get("rackId");
         if (rackIdObj == null && payload.containsKey("rackId")) {
@@ -92,7 +114,9 @@ public class BookController {
         } else if (rackIdObj != null) {
             Long rackId = Long.valueOf(rackIdObj.toString());
             Rack rack = rackRepository.findById(rackId).orElse(null);
-            if (rack == null) return ResponseEntity.badRequest().body("Rack not found");
+            if (rack == null) {
+                return ResponseEntity.badRequest().body("Rack not found");
+            }
             book.setRack(rack);
         }
 
@@ -114,10 +138,13 @@ public class BookController {
             if (book != null) {
                 if (update.containsKey("rackId")) {
                     Object rId = update.get("rackId");
-                    if (rId == null) book.setRack(null);
-                    else {
+                    if (rId == null) {
+                        book.setRack(null); 
+                    }else {
                         Rack rack = rackRepository.findById(Long.valueOf(rId.toString())).orElse(null);
-                        if (rack != null) book.setRack(rack);
+                        if (rack != null) {
+                            book.setRack(rack);
+                        }
                     }
                 }
                 if (update.containsKey("position")) {

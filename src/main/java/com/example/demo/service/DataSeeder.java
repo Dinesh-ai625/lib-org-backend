@@ -1,14 +1,26 @@
 package com.example.demo.service;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import com.example.demo.model.Book;
+import com.example.demo.model.FineLog;
+import com.example.demo.model.FineStatus;
+import com.example.demo.model.Rack;
+import com.example.demo.model.Role;
+import com.example.demo.model.Transaction;
+import com.example.demo.model.TransactionStatus;
+import com.example.demo.model.User;
+import com.example.demo.repository.BookRepository;
+import com.example.demo.repository.FineLogRepository;
+import com.example.demo.repository.RackRepository;
+import com.example.demo.repository.TransactionRepository;
+import com.example.demo.repository.UserRepository;
 
 @Component
 public class DataSeeder implements CommandLineRunner {
